@@ -1,6 +1,6 @@
 <?php
 session_start();
-
+$_SESSION = [];
 if ( isset($_SESSION['apriori_parfum_id']) ) {
     header("location:index.php");
 }
