@@ -3,6 +3,7 @@ include_once "../database.php";
 include_once "../fungsi.php";
 
 $id_process = $_REQUEST["id_process"];
+$date = $_REQUEST["date"];
 $db_object = new database();
 
 // Query to fetch data
@@ -14,16 +15,14 @@ ORDER BY conf.nilai_uji_lift DESC";
 
 ($db_query = $db_object->db_query($sql_que)) or die("Query failed");
 
-// Function to remove spaces from array elements
+// Remove spaces from array elements
 function removeSpaces($inputArray)
 {
-    if (!is_array($inputArray)) {
-        return [];
-    }
+    if (!is_array($inputArray)) return [];
     return array_map("trim", $inputArray);
 }
 
-// Function to reformat the sentence
+// Reformat rules into sentences
 function ReformatSentence($arr)
 {
     $categories = [
@@ -32,14 +31,12 @@ function ReformatSentence($arr)
         "jenis_kelamin" => ["male", "female"],
         "harga" => ["priceabove20000", "pricebelow20000"],
     ];
-
     $prefixes = [
         "produk" => "membeli ",
         "umur" => "berumur ",
         "jenis_kelamin" => "berjenis kelamin ",
         "harga" => "memiliki total ",
     ];
-
     foreach ($arr as &$item) {
         foreach ($categories as $category => $values) {
             if (in_array($item, $values)) {
@@ -51,7 +48,7 @@ function ReformatSentence($arr)
     return implode(" dan ", $arr);
 }
 
-// Initialize
+// Build cell data
 $i = 0;
 $cell = [];
 
@@ -73,21 +70,26 @@ require('./fpdf186/fpdf.php');
 
 class PDF extends FPDF
 {
-    private $currentRow = 0;
-    private $maxRowsPerPage = 30;
+    private $lineHeight = 0.7;
+
+    function __construct($orientation = 'L', $unit = 'cm', $size = 'A4')
+    {
+        parent::__construct($orientation, $unit, $size);
+        $this->SetMargins(1, 1, 1);
+        $this->SetAutoPageBreak(true, 1);
+    }
 
     function Header()
     {
         $this->SetFont("Courier", "B", 14);
-        $this->Cell(28, 1, "Laporan Hasil Analisa", "LRTB", 0, "C");
-        $this->Ln(1.5);
+        $this->Cell(0, 1, "Laporan Hasil Analisa", 0, 1, "C");
+        $this->Ln(0.5);
 
-        // Table header
+        $this->SetFillColor(200, 220, 255);
         $this->SetFont("Courier", "B", 10);
-        $this->Cell(1, 1, "No", 1, 0, "C");
-        $this->Cell(24, 1, "Rule", 1, 0, "C");
-        $this->Cell(3, 1, "Nilai Lift Ratio", 1, 0, "C");
-        $this->Ln();
+        $this->Cell(1, 1, "No", 1, 0, "C", true);
+        $this->Cell(24, 1, "Rule", 1, 0, "C", true);
+        $this->Cell(3, 1, "Nilai Lift", 1, 1, "C", true);
     }
 
     function Footer()
@@ -97,13 +99,44 @@ class PDF extends FPDF
         $this->Cell(0, 0.5, "Halaman " . $this->PageNo() . "/{nb}", 0, 0, "C");
     }
 
-    function checkPageBreak($height)
+    function checkPageBreak($h)
     {
-        if ($this->GetY() + $height > $this->PageBreakTrigger) {
+        if ($this->GetY() + $h > $this->PageBreakTrigger) {
             $this->AddPage();
             return true;
         }
         return false;
+    }
+
+    function NbLines($w, $txt)
+    {
+        $cw = &$this->CurrentFont['cw'];
+        if ($w == 0) $w = $this->w - $this->rMargin - $this->x;
+        $wmax = ($w - 2 * $this->cMargin) * 1000 / $this->FontSize;
+        $s = str_replace("\r", '', $txt);
+        $nb = strlen($s);
+        if ($nb > 0 && $s[$nb - 1] == "\n") $nb--;
+        $sep = -1;
+        $i = 0; $j = 0; $l = 0; $nl = 1;
+        while ($i < $nb) {
+            $c = $s[$i];
+            if ($c == "\n") {
+                $i++; $sep = -1; $j = $i; $l = 0; $nl++; continue;
+            }
+            if ($c == ' ') $sep = $i;
+            $l += $cw[$c] ?? 0;
+            if ($l > $wmax) {
+                if ($sep == -1) {
+                    if ($i == $j) $i++;
+                } else {
+                    $i = $sep + 1;
+                }
+                $sep = -1; $j = $i; $l = 0; $nl++;
+            } else {
+                $i++;
+            }
+        }
+        return $nl;
     }
 }
 
@@ -112,21 +145,19 @@ $pdf = new PDF("L", "cm", "A4");
 $pdf->AliasNbPages();
 $pdf->AddPage();
 
-// Table settings
-$lineHeight = 0.7;
 $colNoWidth = 1;
 $colRuleWidth = 24;
 $colLiftWidth = 3;
+$lineHeight = 0.7;
 
 for ($j = 0; $j < $i; $j++) {
     $rule = $cell[$j][1] ?? "";
     $liftValue = $cell[$j][0] ?? "";
+    $fill = $j % 2 == 0;
 
-    // Calculate needed height for this row
-    $ruleLines = ceil($pdf->GetStringWidth($rule) / ($colRuleWidth * 10)); // Approximate lines needed
+    $ruleLines = $pdf->NbLines($colRuleWidth, $rule);
     $rowHeight = $lineHeight * max(1, $ruleLines);
 
-    // Check if we need a new page
     if ($pdf->checkPageBreak($rowHeight)) {
         $pdf->SetY($pdf->GetY() + 1);
     }
@@ -134,26 +165,17 @@ for ($j = 0; $j < $i; $j++) {
     $x = $pdf->GetX();
     $y = $pdf->GetY();
 
-    // Save current position
-    $startY = $y;
+    $pdf->SetFont("Courier", "", 9);
+    $pdf->SetFillColor(245, 245, 245);
 
-    // No column - fixed height
-    $pdf->MultiCell($colNoWidth, $rowHeight, $j + 1, 1, 'C', false);
-    $xRight = $pdf->GetX();
-    $yAfter = $pdf->GetY();
-
-    // Rule column - multi-line
+    $pdf->MultiCell($colNoWidth, $rowHeight, $j + 1, 1, 'C', $fill);
     $pdf->SetXY($x + $colNoWidth, $y);
-    $pdf->MultiCell($colRuleWidth, $lineHeight, $rule, 1, 'L', false);
-    $maxY = $pdf->GetY();
-
-    // Lift Value column - same height as Rule column
+    $pdf->MultiCell($colRuleWidth, $lineHeight, $rule, 1, 'L', $fill);
     $pdf->SetXY($x + $colNoWidth + $colRuleWidth, $y);
-    $pdf->MultiCell($colLiftWidth, $rowHeight, $liftValue, 1, 'C', false);
+    $pdf->MultiCell($colLiftWidth, $rowHeight, $liftValue, 1, 'C', $fill);
 
-    // Update position to the maximum Y used
-    $pdf->SetXY($x, $maxY);
+    $pdf->SetXY($x, $y + $rowHeight);
 }
 
-$pdf->Output("Laporan_Analisa.pdf", "I");
+$pdf->Output("Laporan_Analisa_".$date.".pdf", "I");
 ?>

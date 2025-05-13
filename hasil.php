@@ -93,7 +93,7 @@ $jumlah=$db_object->db_num_rows($query);
                             $view = "<a href='index.php?menu=view_rule&id_process=".$row['id']."'>View rule</a>";
                             echo "<td>".$view."</td>";
                             echo "<td>";
-                            echo "<a href='export/CLP.php?id_process=".$row['id']."' "
+                            echo "<a href='export/CLP.php?id_process=".$row['id']."&date=".$row['start_date']."_".$row['end_date']."' "."' "
                                     . "class='btn btn-app btn-light btn-xs' target='blank'>
                                     <i class='ace-icon fa fa-print bigger-160'></i>
                                     Print
