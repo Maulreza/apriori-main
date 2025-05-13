@@ -323,7 +323,7 @@ function display_process_hasil_mining($db_object, $id_process) {
             $cell[$no][1] = "Jika konsumen " . $kombinasi1 . " maka konsumen akan " . $kombinasi2;
 
             echo "<tr>";
-            echo "<td>" . $no . "</td>";
+            echo "<td>" . ($no + 1) . "</td>";
             echo "<td>" . $cell[$no][1] . "</td>";
             echo "<td>" . $cell[$no][0] . "</td>";
             echo "<td>" . ($data['nilai_uji_lift'] >= 1.0 ? "Lolos" : "Tidak Lolos") . "</td>";

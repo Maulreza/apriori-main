@@ -134,7 +134,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["submit"])) {
                             <label>Min Support: </label>
                             <input name="min_support" type="text"
                                    value="<?php echo $_POST["min_support"]; ?>"
-                                   class="form-control" placeholder="Min Support">
+                                   class="form-control" placeholder="Min Support (0-70)">
                         </div>
                         <div class="form-group">
                             <label>Min Confidence: </label>
@@ -142,7 +142,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["submit"])) {
                                    value="<?php echo $_POST[
                                    "min_confidence"
                                    ]; ?>"
-                                   class="form-control" placeholder="Min Confidence">
+                                   class="form-control" placeholder="Min Confidence (0-70)">
                         </div>
                         <input type="hidden" name="id_process" value="<?php echo $id_process; ?>">
                         <div class="form-group">
@@ -260,7 +260,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["submit"])) {
                 <th>Produk</th>
             </tr>
             <?php
-            $no = 1;
+            $no = 0;
             while ($row = $db_object->db_fetch_array($query)) {
                 echo "<tr>";
                 echo "<td>" . $no . "</td>";
