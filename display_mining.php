@@ -101,7 +101,7 @@ function display_process_hasil_mining($db_object, $id_process) {
                 ;//. " ORDER BY lolos DESC";
     $query1 = $db_object->db_query($sql1);
     ?>
-    Confidence dari itemset 4
+    <h3>Confidence dari itemset 4</h3>
     <table class='table table-bordered table-striped  table-hover'>
         <tr>
         <th>No</th>
@@ -140,7 +140,7 @@ function display_process_hasil_mining($db_object, $id_process) {
                 ;//. " ORDER BY lolos DESC";
     $query1 = $db_object->db_query($sql1);
     ?>
-    Confidence dari itemset 3
+        <h3>Confidence dari itemset 3</h3>
     <table class='table table-bordered table-striped  table-hover'>
         <tr>
         <th>No</th>
@@ -179,7 +179,7 @@ function display_process_hasil_mining($db_object, $id_process) {
                 ;//. " ORDER BY lolos DESC";
     $query1 = $db_object->db_query($sql1);
     ?>
-    Confidence dari itemset 2
+    <h3>Confidence dari itemset 2</h3>
     <table class='table table-bordered table-striped  table-hover'>
         <tr>
         <th>No</th>
@@ -212,7 +212,7 @@ function display_process_hasil_mining($db_object, $id_process) {
 
     <!-- <?php echo "TOTAL LOLOS : ".count($data_confidence); ?> -->
 
-    <strong>Rule Asosiasi yang terbentuks:</strong>
+    <h3>Rule Asosiasi yang terbentuk:</h3>
     <table class='table table-bordered table-striped  table-hover'>
         <tr>
             <th>No</th>
@@ -254,6 +254,84 @@ function display_process_hasil_mining($db_object, $id_process) {
         ?>
     </table>
 
+    <h3>Nilai Uji Lift:</h3>
+    <table class='table table-bordered table-striped  table-hover'>
+        <tr>
+            <th>No</th>
+            <th>X => Y</th>
+            <th>Nilai Uji lift</th>
+            <th>Keterangan</th>
+        </tr>
+        <?php
+        $sql_que = "SELECT conf.*, log.start_date, log.end_date
+            FROM confidence conf, process_log `log`
+            WHERE conf.id_process = '$id_process'
+            AND conf.id_process = log.id
+            ORDER BY conf.nilai_uji_lift DESC";
+
+        ($db_query = $db_object->db_query($sql_que)) or die("Query failed");
+        function removeSpaces($inputArray)
+        {
+            if (!is_array($inputArray)) {
+                return [];
+            }
+            return array_map("trim", $inputArray);
+        }
+
+        // Function to reformat the sentence
+        function ReformatSentence($arr)
+        {
+            $categories = [
+                "produk" => ["smallkebab", "syawarma", "burger", "kebab", "hotdog", "kebabsosis", "blackkebab"],
+                "umur" => ["agelow", "ageold", "agemature"],
+                "jenis_kelamin" => ["male", "female"],
+                "harga" => ["priceabove20000", "pricebelow20000"],
+            ];
+
+            $prefixes = [
+                "produk" => "membeli ",
+                "umur" => "berumur ",
+                "jenis_kelamin" => "berjenis kelamin ",
+                "harga" => "memiliki total ",
+            ];
+
+            foreach ($arr as &$item) {
+                foreach ($categories as $category => $values) {
+                    if (in_array($item, $values)) {
+                        $item = $prefixes[$category] . $item;
+                        break;
+                    }
+                }
+            }
+            return implode(" dan ", $arr);
+        }
+
+        // Initialize
+        $no = 0;
+        $cell = [];
+
+        while ($data = $db_object->db_fetch_array($db_query)) {
+            if ($data["nilai_uji_lift"] < 1.0) continue;
+
+            $kombinasi1 = removeSpaces(explode(",", $data["kombinasi1"]));
+            $kombinasi1 = !empty($kombinasi1) ? ReformatSentence($kombinasi1) : "";
+
+            $kombinasi2 = removeSpaces(explode(",", $data["kombinasi2"]));
+            $kombinasi2 = !empty($kombinasi2) ? ReformatSentence($kombinasi2) : "";
+
+            $cell[$no][0] = price_format($data["nilai_uji_lift"]);
+            $cell[$no][1] = "Jika konsumen " . $kombinasi1 . " maka konsumen akan " . $kombinasi2;
+
+            echo "<tr>";
+            echo "<td>" . $no . "</td>";
+            echo "<td>" . $cell[$no][1] . "</td>";
+            echo "<td>" . $cell[$no][0] . "</td>";
+            echo "<td>" . ($data['nilai_uji_lift'] >= 1.0 ? "Lolos" : "Tidak Lolos") . "</td>";
+            echo "</tr>";
+            $no++;
+        }
+        ?>
+    </table>
     <?php
 }
 ?>

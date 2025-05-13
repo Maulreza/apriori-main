@@ -119,7 +119,7 @@ function mining_process($db_object, $min_support, $min_confidence, $start_date, 
     
     
     //build itemset 1
-    echo "<br><strong>Itemset 1:</strong><br>";
+    echo "<br><h3>Itemset 1:</h3>";
     echo "<table class='table table-bordered table-striped  table-hover'>
             <tr>
                 <th>No</th>
@@ -157,7 +157,7 @@ function mining_process($db_object, $min_support, $min_confidence, $start_date, 
     $db_object->db_query($sql_insert_itemset1);
     
     //display itemset yg lolos
-    echo "<br><strong>Itemset 1 yang lolos:</strong><br>";
+    echo "<br/><h3>Itemset 1 yang lolos:</h3>";
     echo "<table class='table table-bordered table-striped  table-hover'>
             <tr>
                 <th>No</th>
@@ -179,7 +179,7 @@ function mining_process($db_object, $min_support, $min_confidence, $start_date, 
     
     
     //build itemset2
-    echo "<br><strong>Itemset 2:</strong><br>";
+    echo "</br><h3>Itemset 2:</h3>";
     echo "<table class='table table-bordered table-striped  table-hover'>
             <tr>
                 <th>No</th>
@@ -241,7 +241,7 @@ function mining_process($db_object, $min_support, $min_confidence, $start_date, 
     $db_object->db_query($sql_insert_itemset2);
     
     //display itemset yg lolos
-    echo "<br><strong>Itemset 2 yang lolos:</strong><br>";
+    echo "<br><h3>Itemset 2 yang lolos:</h3>";
     echo "<table class='table table-bordered table-striped  table-hover'>
             <tr>
                 <th>No</th>
@@ -264,7 +264,7 @@ function mining_process($db_object, $min_support, $min_confidence, $start_date, 
     echo "</table>";
     
     //build itemset3
-    echo "<br><strong>Itemset 3:</strong><br>";
+    echo "<br><h3>Itemset 3:</h3>";
     echo "<table class='table table-bordered table-striped  table-hover'>
             <tr>
                 <th>No</th>
@@ -359,7 +359,7 @@ function mining_process($db_object, $min_support, $min_confidence, $start_date, 
     echo "Success insert itemset3 = ". count($valueIn_itemset3) . "<br>";
     
     //display itemset yg lolos
-    echo "<br><strong>Itemset 3 yang lolos:</strong><br>";
+    echo "<br><h3>Itemset 3 yang lolos:</h3>";
     echo "<table class='table table-bordered table-striped  table-hover'>
             <tr>
                 <th>No</th>
@@ -385,7 +385,7 @@ function mining_process($db_object, $min_support, $min_confidence, $start_date, 
 
     // NEW CODE
     // Build itemset4
-    echo "<br><strong>Itemset 4:</strong><br>";
+    echo "<br><h3>Itemset 4:</h3>";
     echo "<table class='table table-bordered table-striped  table-hover'>
             <tr>
                 <th>No</th>
@@ -501,7 +501,7 @@ function mining_process($db_object, $min_support, $min_confidence, $start_date, 
     echo "Success insert itemset3 = ". count($valueIn_itemset4) . "<br>";
 
     //display itemset yg lolos
-    echo "<br><strong>Itemset 4 yang lolos:</strong><br>";
+    echo "<br><h3>Itemset 4 yang lolos:</h3>";
     echo "<table class='table table-bordered table-striped  table-hover'>
             <tr>
                 <th>No</th>
@@ -692,7 +692,7 @@ function mining_process($db_object, $min_support, $min_confidence, $start_date, 
         }
     }
 
-    echo "TOTAL LOOPING " . $no . "<br>";
+    echo "<b>TOTAL LOOPING </b>" . $no . "<br>";
 
     //dari itemset 2
     $sql_2 = "SELECT * FROM itemset2 WHERE lolos = 1 AND id_process = ".$id_process;
